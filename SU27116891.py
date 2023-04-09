@@ -748,6 +748,7 @@ def game(flight_cost_matrix,airport_suitcases_array,game_mode):
     allowed_to_flip_array = stdarray.create1D(4,True)
     p1_last_suitecase = 0
     p2_last_suitecase = 0
+    last_suitcase = 0
     can_ask_opponent_to_leave = False
     can_play_obstacle = False
     suitcase_pos = 0
@@ -760,7 +761,10 @@ def game(flight_cost_matrix,airport_suitcases_array,game_mode):
         AIRPORT_DESTINATION = stdio.readString().upper()
         stdio.writef(SAY_INITIAL_AIRPORT, cur_player + 1, AIRPORT_DESTINATION)
 
-        p1_airport_id = ord(AIRPORT_DESTINATION.strip()) - 65
+        if q == 0:
+            p1_airport_id = ord(AIRPORT_DESTINATION.strip()) - 65
+        if q == 1:
+            p2_airport_id = ord(AIRPORT_DESTINATION.strip()) - 65
         print_airport_grid(p1_airport_id, p2_airport_id)
         for j in range(0,4):
             suitcase_numbers_array[j] = airport_suitcases_array[p1_airport_id][j] 
@@ -768,17 +772,28 @@ def game(flight_cost_matrix,airport_suitcases_array,game_mode):
         print_suitcase_grid(p1_last_suitecase, p2_last_suitecase)
         stdio.writef(ASK_SUITCASE_POSITION, cur_player + 1)
 
-        suitcase_pos = int(stdio.readString().strip()) #check all the inputs if the the input is valid
+        try:
+            suitcase_pos = int(stdio.readString().strip()) #check all the inputs if the the input is valid
+        except:
+            termination(ERR_FLOAT_EXPECTED)
         
         
-        
-    
         stdio.writef(SAY_SUITCASE_FLIPPED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
         suitcase_num = suitcase_numbers_array[suitcase_pos - 1]
         print_single_suitcase_number(suitcase_num)
-        p1_last_suitecase = suitcase_num
-    
-        stdio.writef(SAY_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+
+        
+        if (suitcase_num == (last_suitcase+1)):
+            stdio.writef(SAY_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+            if q == 0:
+                p1_last_suitecase = suitcase_num
+                last_suitcase = suitcase_num
+            if q == 1:
+                p2_last_suitecase = suitcase_num
+                last_suitcase = suitcase_num
+        else:
+            stdio.writef(SAY_NOT_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+                
         print_suitcase_grid(p1_last_suitecase, p2_last_suitecase)
     # TODO: Next, we want to loop through the game rounds. One round consists of two turns, one for each player.
     # For example, the following `while` loop will loop until the global variable game_over is set to `True`, indicating that the game has ended.
