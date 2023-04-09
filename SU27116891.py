@@ -749,8 +749,8 @@ def game(flight_cost_matrix,airport_suitcases_array,game_mode):
     p1_last_suitecase = 0
     p2_last_suitecase = 0
     last_suitcase = 0
-    can_ask_opponent_to_leave = False
-    can_play_obstacle = False
+    can_ask_opponent_to_leave = True
+    can_play_obstacle = True
     suitcase_pos = 0
     suitcase_num = 0
     for q in range(0,2):
@@ -783,22 +783,33 @@ def game(flight_cost_matrix,airport_suitcases_array,game_mode):
         print_single_suitcase_number(suitcase_num)
 
         
-        if (suitcase_num == (last_suitcase+1)):
-            stdio.writef(SAY_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
-            if q == 0:
+        
+
+        if q == 0:
+            if (suitcase_num == (p1_last_suitecase+1)):
+                stdio.writef(SAY_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
                 p1_last_suitecase = suitcase_num
-                last_suitcase = suitcase_num
-            if q == 1:
+            else:
+                stdio.writef(SAY_NOT_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+        if q == 1:
+            if (suitcase_num == (p2_last_suitecase+1)):
+                stdio.writef(SAY_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
                 p2_last_suitecase = suitcase_num
-                last_suitcase = suitcase_num
-        else:
-            stdio.writef(SAY_NOT_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+            else:
+                stdio.writef(SAY_NOT_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
                 
         print_suitcase_grid(p1_last_suitecase, p2_last_suitecase)
     # TODO: Next, we want to loop through the game rounds. One round consists of two turns, one for each player.
     # For example, the following `while` loop will loop until the global variable game_over is set to `True`, indicating that the game has ended.
     while not game_over:
         # TODO: play the game. You will need to change the contents of this while loop
+        cur_round_number += 1
+        for q in range(0,2):
+            cur_player = q
+            print_cost_matrix(flight_cost_matrix, cur_player, cur_player_wallet, cur_round_number)
+            print_airport_grid(p1_airport_id, p2_airport_id)
+
+            show_options(cur_player, can_ask_opponent_to_leave, can_play_obstacle, game_mode)
         stdio.writeln('Game is running...')
         end_game()
         # This is an example of how to end the game. You should change this appropriately.
