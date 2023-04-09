@@ -752,29 +752,34 @@ def game(flight_cost_matrix,airport_suitcases_array,game_mode):
     can_play_obstacle = False
     suitcase_pos = 0
     suitcase_num = 0
-    
-    print_cost_matrix(flight_cost_matrix, cur_player, cur_player_wallet, cur_round_number)
+    for q in range(0,2):
+        cur_player = q
+        print_cost_matrix(flight_cost_matrix, cur_player, cur_player_wallet, cur_round_number)
     # TODO: First we want the players to select their starting positions and flip their first suitcases.
-    stdio.writef(ASK_AIRPORT_DESTINATION, cur_player + 1)
-    AIRPORT_DESTINATION = stdio.readString().upper()
-    stdio.writef(SAY_INITIAL_AIRPORT, cur_player + 1, AIRPORT_DESTINATION)
+        stdio.writef(ASK_AIRPORT_DESTINATION, cur_player + 1)
+        AIRPORT_DESTINATION = stdio.readString().upper()
+        stdio.writef(SAY_INITIAL_AIRPORT, cur_player + 1, AIRPORT_DESTINATION)
 
-    p1_airport_id = ord(AIRPORT_DESTINATION.strip()) - 65
-    print_airport_grid(p1_airport_id, p2_airport_id)
-    for j in range(0,4):
-        suitcase_numbers_array[j] = airport_suitcases_array[p1_airport_id][j] 
-    print_airport_suitcases(suitcase_numbers_array, collected_array, allowed_to_flip_array)
-    print_suitcase_grid(p1_last_suitecase, p2_last_suitecase)
-    stdio.writef(ASK_SUITCASE_POSITION, cur_player + 1)
+        p1_airport_id = ord(AIRPORT_DESTINATION.strip()) - 65
+        print_airport_grid(p1_airport_id, p2_airport_id)
+        for j in range(0,4):
+            suitcase_numbers_array[j] = airport_suitcases_array[p1_airport_id][j] 
+        print_airport_suitcases(suitcase_numbers_array, collected_array, allowed_to_flip_array)
+        print_suitcase_grid(p1_last_suitecase, p2_last_suitecase)
+        stdio.writef(ASK_SUITCASE_POSITION, cur_player + 1)
 
-    suitcase_pos = int(stdio.readString().strip()) #check all the inputs if the the input is valid
+        suitcase_pos = int(stdio.readString().strip()) #check all the inputs if the the input is valid
         
         
         
     
-    stdio.writef(SAY_SUITCASE_FLIPPED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
-    suitcase_num = suitcase_numbers_array[suitcase_pos - 1]
-    print_single_suitcase_number(suitcase_num)
+        stdio.writef(SAY_SUITCASE_FLIPPED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+        suitcase_num = suitcase_numbers_array[suitcase_pos - 1]
+        print_single_suitcase_number(suitcase_num)
+        p1_last_suitecase = suitcase_num
+    
+        stdio.writef(SAY_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+        print_suitcase_grid(p1_last_suitecase, p2_last_suitecase)
     # TODO: Next, we want to loop through the game rounds. One round consists of two turns, one for each player.
     # For example, the following `while` loop will loop until the global variable game_over is set to `True`, indicating that the game has ended.
     while not game_over:
