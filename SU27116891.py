@@ -733,12 +733,12 @@ def game(flight_cost_matrix):
     You do not have to use this function. If you do, you should change it appropriately.
     """
     cur_player = 0
-    cur_player_wallet = 100.00
+    cur_player_wallet = INITIAL_BALANCE
     cur_round_number = 1
     
     print_cost_matrix(flight_cost_matrix, cur_player, cur_player_wallet, cur_round_number)
     # TODO: First we want the players to select their starting positions and flip their first suitcases.
-
+    stdio.writeln(ASK_AIRPORT_DESTINATION)
     # TODO: Next, we want to loop through the game rounds. One round consists of two turns, one for each player.
     # For example, the following `while` loop will loop until the global variable game_over is set to `True`, indicating that the game has ended.
     while not game_over:
