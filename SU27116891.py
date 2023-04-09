@@ -707,6 +707,7 @@ def runner():
     # The input file contains the airport layout. Refer to the project specification for more details.
     # Remember to do any necessary error checking.
     airport_coordinates_matrix = stdarray.create2D(10,2,0.0)
+    airport_suitcases_array = stdarray.create2D(10,4,0.0)
     for x in range(0,10):
         for y in range(0,2):
             try:
@@ -714,20 +715,24 @@ def runner():
             except:
                 termination(ERR_FLOAT_EXPECTED)
         for i in range(0,4):
-            stdio.readString()
+            try:
+                airport_suitcases_array[x][i] = int(stdio.readString())
+            except:
+                termination(ERR_FLOAT_EXPECTED) # this is supposed to be int but i cannot find a message for it {ask Team}
     # TODO: Generate the cost matrix by calling the function `generate_cost_matrix()`.
     # The function `generate_cost_matrix()` takes one parameter, which is a two-dimenstional list of airport coordinates. The 2D list is a 10x2 matrix, where each row represents the `x` and `y` coordinates of an airport, in that order. You must perform validation on the input file to ensure that the input file contains the correct number of airports and that the coordinates are valid. What would happen if a the person who created the input file suddenly became sleepy and decided to enter `Q` in the airport layout section of the input file?
     # The airport layout should be read in the previous step and stored in an appropriate variable.
     flight_cost_matrix = stdarray.create2D(10,10,0.0)
     flight_cost_matrix = generate_cost_matrix(airport_coordinates_matrix)
+    
     # TODO: Start an instance of the game.
     # This is were the actual gameplay takes place. Read the project specification for more details.
     # Remember, players may start a new game after the previous game has ended. We have not provided any code to handle this, but you should implement the functionality to restart a game, as many times as the user would like to play.
     # NOTE: a new game does not mean that the program is restarted. The program should continue to run, but the game should be reset to its initial state and play the game as if it was the first time the game was played.
     # NOTE: When a new game is started, use the same command line arguments, airport coordinates, initial airport suitcase number assignments, and cost matrix as the previous game.
-    game(flight_cost_matrix)
+    game(flight_cost_matrix,airport_suitcases_array,game_mode)
 
-def game(flight_cost_matrix):
+def game(flight_cost_matrix,airport_suitcases_array,game_mode):
     """
     This is an example of a function that you may use to start the game.
     You do not have to use this function. If you do, you should change it appropriately.
@@ -735,10 +740,41 @@ def game(flight_cost_matrix):
     cur_player = 0
     cur_player_wallet = INITIAL_BALANCE
     cur_round_number = 1
+    AIRPORT_DESTINATION = ''
+    p1_airport_id = -1
+    p2_airport_id = -1
+    suitcase_numbers_array = stdarray.create1D(4,0)
+    collected_array = stdarray.create1D(4,False)
+    allowed_to_flip_array = stdarray.create1D(4,True)
+    p1_last_suitecase = 0
+    p2_last_suitecase = 0
+    can_ask_opponent_to_leave = False
+    can_play_obstacle = False
+    suitcase_pos = 0
+    suitcase_num = 0
     
     print_cost_matrix(flight_cost_matrix, cur_player, cur_player_wallet, cur_round_number)
     # TODO: First we want the players to select their starting positions and flip their first suitcases.
-    stdio.writeln(ASK_AIRPORT_DESTINATION)
+    stdio.writef(ASK_AIRPORT_DESTINATION, cur_player + 1)
+    AIRPORT_DESTINATION = stdio.readString().upper()
+    stdio.writef(SAY_INITIAL_AIRPORT, cur_player + 1, AIRPORT_DESTINATION)
+
+    p1_airport_id = ord(AIRPORT_DESTINATION.strip()) - 65
+    print_airport_grid(p1_airport_id, p2_airport_id)
+    for j in range(0,4):
+        suitcase_numbers_array[j] = airport_suitcases_array[p1_airport_id][j] 
+    print_airport_suitcases(suitcase_numbers_array, collected_array, allowed_to_flip_array)
+    print_suitcase_grid(p1_last_suitecase, p2_last_suitecase)
+    stdio.writef(ASK_SUITCASE_POSITION, cur_player + 1)
+
+    suitcase_pos = int(stdio.readString().strip()) #check all the inputs if the the input is valid
+        
+        
+        
+    
+    stdio.writef(SAY_SUITCASE_FLIPPED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+    suitcase_num = suitcase_numbers_array[suitcase_pos - 1]
+    print_single_suitcase_number(suitcase_num)
     # TODO: Next, we want to loop through the game rounds. One round consists of two turns, one for each player.
     # For example, the following `while` loop will loop until the global variable game_over is set to `True`, indicating that the game has ended.
     while not game_over:
