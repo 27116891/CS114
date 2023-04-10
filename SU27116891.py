@@ -584,7 +584,7 @@ def calculate_magenta_disk_bonus(player_last_suitcase, opponent_last_suitcase):
 ###############################################################################################
 
 
-def show_options(player, can_ask_opponent_to_leave, can_play_obstacle, game_mode):
+def show_options(player, can_ask_opponent_to_leave, can_play_obstacle, game_mode, cur_player_wallet, flight_price_array):
     """
     At the start of their turn, show the player what they can do at their current airport.
 
@@ -617,12 +617,20 @@ def show_options(player, can_ask_opponent_to_leave, can_play_obstacle, game_mode
     game_mode
         The game mode, with value according to the first command-line argument. This is either 0, 1, or 2. There are much more efficient ways to implement this functionality, but it was easiest to illustrate how we use the `game_mode` variable by simply specifying it as a parameter.
     """
+    player_input = "X"
+    
     if game_mode == 2:
         # Furthermore, when the game_mode variable is set to 2, indicating AI game-play, then the (AI) players cannot use obstacle disks.
         can_play_obstacle = False
         can_ask_opponent_to_leave = False
-    can_fly = PLACE_HOLDER_BOOLEAN # TODO: Replace the placeholder boolean with your own code.
+     
+    can_fly = False # TODO: Replace the placeholder boolean with your own code.
     can_stay = PLACE_HOLDER_BOOLEAN # TODO: Replace the placeholder boolean with your own code.
+
+    for i in range(1,10):
+        if (cur_player_wallet > flight_price_array[i]):
+            can_fly = True
+            
     # The four Boolean variables above indicate whether the player can do the corresponding action.
     # For example, if the player can ask the opponent to leave their airport, then the can_ask_opponent_to_leave variable will be set to True.
     #               This may be false if the player has already asked the opponent to leave their airport during this round.
@@ -667,14 +675,14 @@ def show_options(player, can_ask_opponent_to_leave, can_play_obstacle, game_mode
     stdio.writeln() # Make sure you do not remove this line. It is used to separate the options above from the output that follows. This is important for the marking of your program.
 
     # TODO: Read input from standard input, appropriately.
+    player_input = stdio.readString().upper()
     # We expect the following possible inputs:
     #   - "`A`" for Ask
     #   - "`S`" for Stay
     #   - "`F`" for Fly
     #   - "`U`" for Use an obstacle disk
     # Then decide what to do next, based on the input.
-
-
+    
 ###############################################################################################
 #################################### Controller functions #####################################
 ###############################################################################################
@@ -746,6 +754,7 @@ def game(flight_cost_matrix,airport_suitcases_array,game_mode):
     suitcase_numbers_array = stdarray.create1D(4,0)
     collected_array = stdarray.create1D(4,False)
     allowed_to_flip_array = stdarray.create1D(4,True)
+    flight_price_array = stdarray.create1D(10,0.0)
     p1_last_suitecase = 0
     p2_last_suitecase = 0
     last_suitcase = 0
@@ -755,6 +764,9 @@ def game(flight_cost_matrix,airport_suitcases_array,game_mode):
     suitcase_num = 0
     for q in range(0,2):
         cur_player = q
+
+        
+        
         print_cost_matrix(flight_cost_matrix, cur_player, cur_player_wallet, cur_round_number)
     # TODO: First we want the players to select their starting positions and flip their first suitcases.
         stdio.writef(ASK_AIRPORT_DESTINATION, cur_player + 1)
@@ -809,7 +821,46 @@ def game(flight_cost_matrix,airport_suitcases_array,game_mode):
             print_cost_matrix(flight_cost_matrix, cur_player, cur_player_wallet, cur_round_number)
             print_airport_grid(p1_airport_id, p2_airport_id)
 
-            show_options(cur_player, can_ask_opponent_to_leave, can_play_obstacle, game_mode)
+            if q == 0:
+                for e in range(0,10):
+                   flight_price_array[e] =  flight_cost_matrix[e][p1_airport_id]
+            if q == 1:
+                for e in range(0,10):
+                   flight_price_array[e] =  flight_cost_matrix[e][p2_airport_id]
+            show_options(cur_player, can_ask_opponent_to_leave, can_play_obstacle, game_mode, cur_player_wallet, flight_price_array)
+            for j in range(0,4):
+                suitcase_numbers_array[j] = airport_suitcases_array[p1_airport_id][j] 
+            print_airport_suitcases(suitcase_numbers_array, collected_array, allowed_to_flip_array)
+            print_suitcase_grid(p1_last_suitecase, p2_last_suitecase)
+            stdio.writef(ASK_SUITCASE_POSITION, cur_player + 1)
+
+            try:
+                suitcase_pos = int(stdio.readString().strip()) #check all the inputs if the the input is valid
+            except:
+                termination(ERR_FLOAT_EXPECTED)
+        
+        
+            stdio.writef(SAY_SUITCASE_FLIPPED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+            suitcase_num = suitcase_numbers_array[suitcase_pos - 1]
+            print_single_suitcase_number(suitcase_num)
+
+        
+        
+
+            if q == 0:
+                if (suitcase_num == (p1_last_suitecase+1)):
+                    stdio.writef(SAY_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+                    p1_last_suitecase = suitcase_num
+                else:
+                    stdio.writef(SAY_NOT_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+            if q == 1:
+                if (suitcase_num == (p2_last_suitecase+1)):
+                    stdio.writef(SAY_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+                    p2_last_suitecase = suitcase_num
+                else:
+                    stdio.writef(SAY_NOT_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+                
+            print_suitcase_grid(p1_last_suitecase, p2_last_suitecase)
         stdio.writeln('Game is running...')
         end_game()
         # This is an example of how to end the game. You should change this appropriately.
