@@ -625,7 +625,7 @@ def show_options(player, can_ask_opponent_to_leave, can_play_obstacle, game_mode
         can_ask_opponent_to_leave = False
      
     can_fly = False # TODO: Replace the placeholder boolean with your own code.
-    can_stay = PLACE_HOLDER_BOOLEAN # TODO: Replace the placeholder boolean with your own code.
+    can_stay = True # TODO: Replace the placeholder boolean with your own code.
 
     for i in range(1,10):
         if (cur_player_wallet > flight_price_array[i]):
@@ -682,7 +682,7 @@ def show_options(player, can_ask_opponent_to_leave, can_play_obstacle, game_mode
     #   - "`F`" for Fly
     #   - "`U`" for Use an obstacle disk
     # Then decide what to do next, based on the input.
-    
+    return player_input
 ###############################################################################################
 #################################### Controller functions #####################################
 ###############################################################################################
@@ -746,7 +746,8 @@ def game(flight_cost_matrix,airport_suitcases_array,game_mode):
     You do not have to use this function. If you do, you should change it appropriately.
     """
     cur_player = 0
-    cur_player_wallet = INITIAL_BALANCE
+    p1_wallet = INITIAL_BALANCE
+    p2_wallet = INITIAL_BALANCE
     cur_round_number = 1
     AIRPORT_DESTINATION = ''
     p1_airport_id = -1
@@ -762,9 +763,10 @@ def game(flight_cost_matrix,airport_suitcases_array,game_mode):
     can_play_obstacle = True
     suitcase_pos = 0
     suitcase_num = 0
+    player_input = "S"
     for q in range(0,2):
         cur_player = q
-
+        cur_player_wallet = INITIAL_BALANCE
         
         
         print_cost_matrix(flight_cost_matrix, cur_player, cur_player_wallet, cur_round_number)
@@ -818,51 +820,76 @@ def game(flight_cost_matrix,airport_suitcases_array,game_mode):
         cur_round_number += 1
         for q in range(0,2):
             cur_player = q
-            print_cost_matrix(flight_cost_matrix, cur_player, cur_player_wallet, cur_round_number)
-            print_airport_grid(p1_airport_id, p2_airport_id)
-
             if q == 0:
                 for e in range(0,10):
                    flight_price_array[e] =  flight_cost_matrix[e][p1_airport_id]
+                cur_player_wallet = p1_wallet
+                cur_airport_id = p1_airport_id
             if q == 1:
                 for e in range(0,10):
                    flight_price_array[e] =  flight_cost_matrix[e][p2_airport_id]
-            show_options(cur_player, can_ask_opponent_to_leave, can_play_obstacle, game_mode, cur_player_wallet, flight_price_array)
-            for j in range(0,4):
-                suitcase_numbers_array[j] = airport_suitcases_array[p1_airport_id][j] 
-            print_airport_suitcases(suitcase_numbers_array, collected_array, allowed_to_flip_array)
-            print_suitcase_grid(p1_last_suitecase, p2_last_suitecase)
-            stdio.writef(ASK_SUITCASE_POSITION, cur_player + 1)
-
-            try:
-                suitcase_pos = int(stdio.readString().strip()) #check all the inputs if the the input is valid
-            except:
-                termination(ERR_FLOAT_EXPECTED)
-        
-        
-            stdio.writef(SAY_SUITCASE_FLIPPED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
-            suitcase_num = suitcase_numbers_array[suitcase_pos - 1]
-            print_single_suitcase_number(suitcase_num)
-
-        
-        
-
-            if q == 0:
-                if (suitcase_num == (p1_last_suitecase+1)):
-                    stdio.writef(SAY_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
-                    p1_last_suitecase = suitcase_num
-                else:
-                    stdio.writef(SAY_NOT_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
-            if q == 1:
-                if (suitcase_num == (p2_last_suitecase+1)):
-                    stdio.writef(SAY_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
-                    p2_last_suitecase = suitcase_num
-                else:
-                    stdio.writef(SAY_NOT_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+                cur_player_wallet = p2_wallet
+                cur_airport_id = p2_airport_id
                 
-            print_suitcase_grid(p1_last_suitecase, p2_last_suitecase)
+            print_cost_matrix(flight_cost_matrix, cur_player, cur_player_wallet, cur_round_number)
+            print_airport_grid(p1_airport_id, p2_airport_id)
+
+            
+            player_input = show_options(cur_player, can_ask_opponent_to_leave, can_play_obstacle, game_mode, cur_player_wallet, flight_price_array)
+            print("player input = " + player_input)
+            if (player_input == 'S') or (player_input == "F"):
+                if (player_input == "F"):
+                    stdio.writef(ASK_AIRPORT_DESTINATION, cur_player + 1)
+                    AIRPORT_DESTINATION = stdio.readString().upper()
+                    cur_airport = int_to_char(cur_airport_id)
+                    flight_cost = flight_price_array[char_to_int(AIRPORT_DESTINATION.strip())]
+                    
+                    stdio.writef(SAY_FLIGHT_INFO, cur_player + 1,cur_airport, AIRPORT_DESTINATION, flight_cost) #check if player can afford flight
+
+                    if q == 0:
+                        p1_airport_id = ord(AIRPORT_DESTINATION.strip()) - 65
+                    if q == 1:
+                        p2_airport_id = ord(AIRPORT_DESTINATION.strip()) - 65
+                    cur_player_wallet -= flight_cost
+                    print_airport_grid(p1_airport_id, p2_airport_id)
+                for j in range(0,4):
+                    suitcase_numbers_array[j] = airport_suitcases_array[cur_airport_id][j] 
+                print_airport_suitcases(suitcase_numbers_array, collected_array, allowed_to_flip_array)
+                print_suitcase_grid(p1_last_suitecase, p2_last_suitecase)
+                stdio.writef(ASK_SUITCASE_POSITION, cur_player + 1)
+
+                try:
+                    suitcase_pos = int(stdio.readString().strip()) #check all the inputs if the the input is valid
+                except:
+                    termination(ERR_FLOAT_EXPECTED)
+        
+        
+                stdio.writef(SAY_SUITCASE_FLIPPED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+                suitcase_num = suitcase_numbers_array[suitcase_pos - 1]
+                print_single_suitcase_number(suitcase_num)
+
+        
+        
+
+                if q == 0:
+                    p1_wallet = cur_player_wallet
+                    if (suitcase_num == (p1_last_suitecase+1)):
+                        stdio.writef(SAY_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+                        p1_last_suitecase = suitcase_num
+                    else:
+                        stdio.writef(SAY_NOT_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+                if q == 1:
+                    p2_wallet = cur_player_wallet
+                    if (suitcase_num == (p2_last_suitecase+1)):
+                        stdio.writef(SAY_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+                        p2_last_suitecase = suitcase_num
+                    else:
+                        stdio.writef(SAY_NOT_COLLECTED, cur_player + 1, suitcase_pos ,AIRPORT_DESTINATION)
+                
+                print_suitcase_grid(p1_last_suitecase, p2_last_suitecase) # suitcase vs suitecase
         stdio.writeln('Game is running...')
-        end_game()
+        if p1_last_suitecase == 10:
+            end_game()
         # This is an example of how to end the game. You should change this appropriately.
         # The `end_game()` function sets the global variable game_over to `True`, indicating that the game has ended.
     stdio.writeln('Game has ended.') # TODO: Remove this. We only need to print information about winning/ losing. Besides, you must use the messages defined in the constants section.
